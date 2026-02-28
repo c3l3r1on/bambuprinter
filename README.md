@@ -95,6 +95,42 @@ Dry run (show payloads, do not send):
 python3 bambusy.py --config printers.json --dry-run calibrate --printers 1,2,3,4,5 --bed-leveling --vibration --motor-noise
 ```
 
+## Short commands (legacy style)
+
+You can also use old short mode compatible with previous script style.
+
+```bash
+./bambusy -u a -c a
+./bambusy.py -u a -c a
+./bambusy.py -u a -c h
+./bambusy.py -u a -c h -b
+./bambusy.py -u a -c h -v
+```
+
+Meaning:
+
+- `-u a` = all printers from config
+- `-c a` = home + all calibrations (bed + vibration + motor noise)
+- `-c h` = home only
+- `-c h -b` = home + bed leveling
+- `-c h -v` = home + vibration calibration
+
+## Reuse in other projects
+
+If you want similar behavior in another tool/app:
+
+1. Keep one printers config JSON (`id`, `host`, `serial`, `access_code`, `port`).
+2. Open MQTT LAN session for each printer (`bblp` user, access code as password).
+3. Publish to topic `device/<serial>/request`.
+4. Send `home` payload, then optional `calibration` payload with bit flags:
+   - bed leveling: `2`
+   - vibration: `4`
+   - motor noise: `8`
+   - all together: `14`
+5. For many printers, loop over selected IDs or use `a` = all.
+
+This script is a minimal reference implementation for that flow.
+
 ## Notes
 
 - Keep `printers.json` private.

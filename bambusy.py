@@ -63,8 +63,39 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Print what would be sent, but do not connect/send.",
     )
+    parser.add_argument(
+        "-u",
+        "--units",
+        dest="legacy_units",
+        help="Legacy mode: printer IDs (e.g. 1,2,3) or 'a' for all.",
+    )
+    parser.add_argument(
+        "-c",
+        "--calibration",
+        dest="legacy_calibration",
+        choices=["a", "b", "m", "v", "h"],
+        help="Legacy mode: a=all, b=bed, m=motor, v=vibration, h=home.",
+    )
+    parser.add_argument(
+        "-b",
+        dest="legacy_bed_leveling",
+        action="store_true",
+        help="Legacy mode: include bed leveling (used with -c h).",
+    )
+    parser.add_argument(
+        "-v",
+        dest="legacy_vibration",
+        action="store_true",
+        help="Legacy mode: include vibration calibration (used with -c h).",
+    )
+    parser.add_argument(
+        "-m",
+        dest="legacy_motor_noise",
+        action="store_true",
+        help="Legacy mode: include motor noise calibration (used with -c h).",
+    )
 
-    subparsers = parser.add_subparsers(dest="cmd", required=True)
+    subparsers = parser.add_subparsers(dest="cmd")
 
     subparsers.add_parser("list", help="List printers from config")
 
@@ -84,9 +115,9 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Printer IDs, e.g. 1,2,3,4,5",
     )
-    cal.add_argument("--bed-leveling", action="store_true", help="Enable bed leveling")
-    cal.add_argument("--vibration", action="store_true", help="Enable vibration calibration")
-    cal.add_argument("--motor-noise", action="store_true", help="Enable motor noise calibration")
+    cal.add_argument("-b", "--bed-leveling", action="store_true", help="Enable bed leveling")
+    cal.add_argument("-v", "--vibration", action="store_true", help="Enable vibration calibration")
+    cal.add_argument("-m", "--motor-noise", action="store_true", help="Enable motor noise calibration")
     cal.add_argument(
         "--home-only",
         action="store_true",
@@ -126,6 +157,64 @@ def load_config(path: Path) -> List[PrinterEntry]:
 
 def parse_printer_ids(raw: str) -> List[int]:
     return [int(chunk.strip()) for chunk in raw.split(",") if chunk.strip()]
+
+
+def parse_legacy_units(raw: str, printers: List[PrinterEntry]) -> str:
+    value = raw.strip().lower()
+    if value in {"a", "all"}:
+        all_ids = [str(p.id) for p in printers]
+        if not all_ids:
+            raise ValueError("No printers in config.")
+        return ",".join(all_ids)
+
+    ids = parse_printer_ids(raw)
+    if not ids:
+        raise ValueError("No valid printer IDs provided in -u/--units.")
+    return ",".join(str(pid) for pid in ids)
+
+
+def build_legacy_dispatch(args: argparse.Namespace, printers: List[PrinterEntry]) -> argparse.Namespace:
+    if not args.legacy_units or not args.legacy_calibration:
+        raise ValueError("Legacy mode requires both -u/--units and -c/--calibration.")
+
+    printers_arg = parse_legacy_units(args.legacy_units, printers)
+
+    bed_leveling = bool(args.legacy_bed_leveling)
+    vibration = bool(args.legacy_vibration)
+    motor_noise = bool(args.legacy_motor_noise)
+
+    mode = args.legacy_calibration
+    if mode == "a":
+        bed_leveling = True
+        vibration = True
+        motor_noise = True
+    elif mode == "b":
+        bed_leveling = True
+    elif mode == "v":
+        vibration = True
+    elif mode == "m":
+        motor_noise = True
+    elif mode == "h" and not (bed_leveling or vibration or motor_noise):
+        return argparse.Namespace(
+            cmd="home",
+            printers=printers_arg,
+            dry_run=args.dry_run,
+            connect_wait=args.connect_wait,
+            post_wait=args.post_wait,
+        )
+
+    return argparse.Namespace(
+        cmd="calibrate",
+        printers=printers_arg,
+        bed_leveling=bed_leveling,
+        vibration=vibration,
+        motor_noise=motor_noise,
+        home_only=False,
+        calibration_delay=3.0,
+        dry_run=args.dry_run,
+        connect_wait=args.connect_wait,
+        post_wait=args.post_wait,
+    )
 
 
 def build_calibration_option(bed_leveling: bool, vibration: bool, motor_noise: bool) -> int:
@@ -263,12 +352,18 @@ def main() -> int:
         return 1
 
     try:
+        if args.cmd is None and (args.legacy_units or args.legacy_calibration):
+            args = build_legacy_dispatch(args, printers)
+
         if args.cmd == "list":
             return cmd_list(printers)
         if args.cmd == "home":
             return cmd_home(args, printers)
         if args.cmd == "calibrate":
             return cmd_calibrate(args, printers)
+        if args.cmd is None:
+            print("No command given. Use list/home/calibrate or legacy mode: -u ... -c ...")
+            return 1
         print(f"Unknown command: {args.cmd}")
         return 1
     except Exception as exc:
