@@ -1,0 +1,44 @@
+{
+  "printers": [
+    {
+      "id": 1,
+      "name": "P1S-Left",
+      "host": "192.168.9.201",
+      "serial": "03XXXXXXXXXXXXXX",
+      "access_code": "12345678",
+      "port": 8883
+    },
+    {
+      "id": 2,
+      "name": "P1S-Right",
+      "host": "192.168.9.202",
+      "serial": "03YYYYYYYYYYYYYY",
+      "access_code": "87654321",
+      "port": 8883
+    },
+    {
+      "id": 3,
+      "name": "A1-Front",
+      "host": "192.168.9.203",
+      "serial": "03ZZZZZZZZZZZZZZ",
+      "access_code": "11112222",
+      "port": 8883
+    },
+    {
+      "id": 4,
+      "name": "A1-Back",
+      "host": "192.168.9.204",
+      "serial": "03AAAAAAAAAAAAAA",
+      "access_code": "33334444",
+      "port": 8883
+    },
+    {
+      "id": 5,
+      "name": "X1C",
+      "host": "192.168.9.205",
+      "serial": "03BBBBBBBBBBBBBB",
+      "access_code": "55556666",
+      "port": 8883
+    }
+  ]
+}
