@@ -1,4 +1,4 @@
-# bambuprinter
+# bambusy
 
 A small Python script to manage multiple Bambu printers from one place.
 
@@ -43,7 +43,7 @@ cp printers.example.json printers.json
 3. List printers:
 
 ```bash
-python3 bambuprinter.py --config printers.json list
+python3 bambusy.py --config printers.json list
 ```
 
 ## Config format
@@ -68,31 +68,31 @@ python3 bambuprinter.py --config printers.json list
 Home only for printers 1..5:
 
 ```bash
-python3 bambuprinter.py --config printers.json home --printers 1,2,3,4,5
+python3 bambusy.py --config printers.json home --printers 1,2,3,4,5
 ```
 
 Calibration for printers 1..5 (bed + vibration + motor noise):
 
 ```bash
-python3 bambuprinter.py --config printers.json calibrate --printers 1,2,3,4,5 --bed-leveling --vibration --motor-noise
+python3 bambusy.py --config printers.json calibrate --printers 1,2,3,4,5 --bed-leveling --vibration --motor-noise
 ```
 
 Bed leveling only for printers 1..5:
 
 ```bash
-python3 bambuprinter.py --config printers.json calibrate --printers 1,2,3,4,5 --bed-leveling
+python3 bambusy.py --config printers.json calibrate --printers 1,2,3,4,5 --bed-leveling
 ```
 
 Home + calibration with custom delay:
 
 ```bash
-python3 bambuprinter.py --config printers.json calibrate --printers 1,2,3,4,5 --bed-leveling --calibration-delay 4
+python3 bambusy.py --config printers.json calibrate --printers 1,2,3,4,5 --bed-leveling --calibration-delay 4
 ```
 
 Dry run (show payloads, do not send):
 
 ```bash
-python3 bambuprinter.py --config printers.json --dry-run calibrate --printers 1,2,3,4,5 --bed-leveling --vibration --motor-noise
+python3 bambusy.py --config printers.json --dry-run calibrate --printers 1,2,3,4,5 --bed-leveling --vibration --motor-noise
 ```
 
 ## Notes

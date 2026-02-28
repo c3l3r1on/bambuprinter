@@ -38,7 +38,7 @@ class PrinterEntry:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        prog="bambuprinter.py",
+        prog="bambusy.py",
         description="One small script to control many Bambu printers over LAN.",
     )
     parser.add_argument(
