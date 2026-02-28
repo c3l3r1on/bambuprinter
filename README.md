@@ -131,6 +131,13 @@ If you want similar behavior in another tool/app:
 
 This script is a minimal reference implementation for that flow.
 
+## Support
+
+If this project helps you, you can support my work:
+
+- Ko-fi: https://ko-fi.com/c3l3r1on
+- Buy Me a Coffee: https://buymeacoffee.com/c3l3r1on
+
 ## Notes
 
 - Keep `printers.json` private.
